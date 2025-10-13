@@ -201,7 +201,8 @@ function updateNavbar() {
     const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
     const isMobile = window.innerWidth <= 1199;
     
-    if (scrollTop > 100) {
+    if (!isMobile && scrollTop > 100) {
+        // Desktop: apply scrolled styling
         navbar.classList.add('scrolled');
         navbar.style.background = 'rgba(17, 17, 17, 0.98)';
         navbar.style.backdropFilter = 'blur(25px)';
@@ -209,12 +210,13 @@ function updateNavbar() {
         navbar.style.boxShadow = '0 4px 30px rgba(0, 0, 0, 0.3)';
         navbar.style.borderBottomColor = 'rgba(255, 255, 255, 0.15)';
     } else {
+        // Mobile or near top: keep transparent/light base
         navbar.classList.remove('scrolled');
-        navbar.style.background = 'rgba(17, 17, 17, 0.95)';
-        navbar.style.backdropFilter = 'blur(20px)';
-        navbar.style.webkitBackdropFilter = 'blur(20px)';
-        navbar.style.boxShadow = '0 2px 20px rgba(0, 0, 0, 0.1)';
-        navbar.style.borderBottomColor = 'rgba(255, 255, 255, 0.1)';
+        navbar.style.background = 'transparent';
+        navbar.style.backdropFilter = 'none';
+        navbar.style.webkitBackdropFilter = 'none';
+        navbar.style.boxShadow = 'none';
+        navbar.style.borderBottomColor = 'transparent';
     }
     
     // Hide/show navbar and header on scroll (only on desktop)

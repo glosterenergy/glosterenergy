@@ -37,6 +37,12 @@ body {
     width: 100%;
     z-index: 1001;
     box-shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transform: translateY(0);
+}
+
+.header.hidden {
+    transform: translateY(-120%);
 }
 
 .header-container {
@@ -83,10 +89,14 @@ body {
     right: 0;
     width: 100%;
     z-index: 1000;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1), transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     box-shadow: none;
     will-change: transform, background, box-shadow;
-    transform: translateZ(0);
+    transform: translateY(0);
+}
+
+.navbar.hidden {
+    transform: translateY(-240%);
 }
 
 .navbar.scrolled {
@@ -1486,6 +1496,18 @@ body {
     backdrop-filter: blur(10px);
 }
 
+.form-group-new select {
+    background: rgba(255, 255, 255, 0.1);
+    color: #ffffff;
+    cursor: pointer;
+}
+
+.form-group-new select option {
+    background: #1a1a1a;
+    color: #ffffff;
+    padding: 0.5rem;
+}
+
 .form-group-new input:focus,
 .form-group-new textarea:focus,
 .form-group-new select:focus {
@@ -1751,6 +1773,19 @@ body {
 .documents-list-new {
     display: grid;
     gap: 1.5rem;
+}
+
+/* Darker look for financial-reports notice */
+.documents-section-new .document-item-new {
+    background: rgba(17, 17, 17, 0.7);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+}
+.documents-section-new .document-content-new {
+    color: #e5e7eb;
+}
+.documents-section-new .category-header-new h3,
+.documents-section-new .category-info-new p {
+    color: #e5e7eb;
 }
 
 .document-item-new {
@@ -2543,7 +2578,6 @@ body {
     .nav-menu {
         gap: 0.002rem;
     }
-}
     
     .hero-title {
         font-size: 3rem;
@@ -3133,6 +3167,3 @@ body {
         padding: 20px 0;
     }
 }
-
-/* Close comment for old laptop styles */
-*/

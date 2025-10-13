@@ -106,52 +106,100 @@ document.querySelectorAll('a[href^="#"]').forEach(anchor => {
 
 // ===== ACTIVE NAVIGATION STATES =====
 function updateActiveNavLink() {
+    // Only manage in-page anchor links; do not touch page-to-page links
     const sections = document.querySelectorAll('section[id]');
-    const navLinks = document.querySelectorAll('.nav-link');
-    
+    const navAnchorLinks = document.querySelectorAll('.nav-link[href^="#"]');
+    if (navAnchorLinks.length === 0 || sections.length === 0) return;
+
     let currentSection = '';
     const scrollPos = window.scrollY + 100;
-    
+
     sections.forEach(section => {
         const sectionTop = section.offsetTop;
         const sectionHeight = section.offsetHeight;
-        
         if (scrollPos >= sectionTop && scrollPos < sectionTop + sectionHeight) {
             currentSection = section.getAttribute('id');
         }
     });
-    
-    navLinks.forEach(link => {
+
+    navAnchorLinks.forEach(link => {
         link.classList.remove('active');
         if (link.getAttribute('href') === `#${currentSection}`) {
             link.classList.add('active');
+            link.setAttribute('aria-current', 'true');
+        } else {
+            link.removeAttribute('aria-current');
         }
     });
 }
 
-// Update active nav link on scroll
+// Highlight current page in navbar based on URL path
+function setActiveNavByPath() {
+    const path = (window.location.pathname.split('/').pop() || 'index.html').toLowerCase();
+    const navLinks = document.querySelectorAll('.nav-link');
+
+    // Only non-anchor links
+    const pageLinks = Array.from(navLinks).filter(l => {
+        const href = l.getAttribute('href') || '';
+        return href && !href.startsWith('#');
+    });
+
+    // Clear existing active on page links
+    pageLinks.forEach(l => l.classList.remove('active'));
+
+    // Find best match
+    let matched = false;
+    pageLinks.forEach(link => {
+        const href = (link.getAttribute('href') || '').toLowerCase();
+        const file = href.split('/').pop();
+        if (file === path || (path === '' && (file === '' || file === 'index.html'))) {
+            link.classList.add('active');
+            link.setAttribute('aria-current', 'page');
+            matched = true;
+        } else {
+            link.removeAttribute('aria-current');
+        }
+    });
+
+    // If nothing matched and we're on root, try index.html
+    if (!matched && (path === '' || path === '/')) {
+        const indexLink = Array.from(pageLinks).find(l => (l.getAttribute('href') || '').toLowerCase().endsWith('index.html'));
+        if (indexLink) {
+            indexLink.classList.add('active');
+            indexLink.setAttribute('aria-current', 'page');
+        }
+    }
+}
+
+// Update active nav link on scroll (own throttle)
+let tickingActiveNav = false;
 window.addEventListener('scroll', () => {
-    if (!ticking) {
+    if (!tickingActiveNav) {
         requestAnimationFrame(() => {
             updateActiveNavLink();
-            ticking = false;
+            tickingActiveNav = false;
         });
-        ticking = true;
+        tickingActiveNav = true;
     }
 });
 
 // Set initial active state
 document.addEventListener('DOMContentLoaded', () => {
+    setActiveNavByPath();
     updateActiveNavLink();
 });
 
 // ===== NAVBAR SCROLL EFFECT =====
 let lastScrollTop = 0;
-let ticking = false;
+let tickingNavbar = false;
 const navbar = document.querySelector('.navbar');
+const header = document.querySelector('.header');
 
 function updateNavbar() {
+    if (!navbar) return;
+    
     const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+    const isMobile = window.innerWidth <= 1199;
     
     if (scrollTop > 100) {
         navbar.classList.add('scrolled');
@@ -169,32 +217,77 @@ function updateNavbar() {
         navbar.style.borderBottomColor = 'rgba(255, 255, 255, 0.1)';
     }
     
-    // Hide/show navbar on scroll (only on desktop)
-    if (window.innerWidth > 767) {
-        if (scrollTop > lastScrollTop && scrollTop > 200) {
-            navbar.style.transform = 'translateY(-100%)';
-            navbar.style.transition = 'transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)';
-        } else {
-            navbar.style.transform = 'translateY(0)';
+    // Hide/show navbar and header on scroll (only on desktop)
+    if (!isMobile) {
+        const scrollThreshold = 200;
+        const scrollDifference = scrollTop - lastScrollTop;
+        
+        if (scrollTop > scrollThreshold && Math.abs(scrollDifference) > 5) {
+            if (scrollDifference > 0) {
+                // Scrolling down - hide navbar and header
+                navbar.classList.add('hidden');
+                if (header) {
+                    header.classList.add('hidden');
+                }
+            } else {
+                // Scrolling up - show navbar and header
+                navbar.classList.remove('hidden');
+                if (header) {
+                    header.classList.remove('hidden');
+                }
+            }
+        } else if (scrollTop <= scrollThreshold) {
+            // Near top - always show
+            navbar.classList.remove('hidden');
+            if (header) {
+                header.classList.remove('hidden');
+            }
+        }
+    } else {
+        // On mobile - always show
+        navbar.classList.remove('hidden');
+        if (header) {
+            header.classList.remove('hidden');
         }
     }
     
     lastScrollTop = scrollTop;
-    ticking = false;
+    tickingNavbar = false;
 }
 
-if (navbar) {
-    window.addEventListener('scroll', () => {
-        if (!ticking) {
-            requestAnimationFrame(updateNavbar);
-            ticking = true;
+// Throttled scroll handler for navbar effect
+function throttledNavbarScrollHandler() {
+    if (!navbar) return;
+    if (!tickingNavbar) {
+        requestAnimationFrame(updateNavbar);
+        tickingNavbar = true;
+    }
+}
+
+// Add scroll event listener for navbar effect
+window.addEventListener('scroll', throttledNavbarScrollHandler);
+
+// Initialize navbar on page load
+document.addEventListener('DOMContentLoaded', () => {
+    if (navbar) {
+        navbar.classList.remove('hidden');
+        if (header) {
+            header.classList.remove('hidden');
         }
-    });
-    
-    // Reset navbar position on window resize
+    }
+});
+
+// Reset navbar position on window resize (handled below)
+
+// Reset navbar and header position on window resize
+if (navbar) {
     window.addEventListener('resize', () => {
-        navbar.style.transform = 'translateY(0)';
-        navbar.style.transition = 'none';
+        navbar.classList.remove('hidden');
+        if (header) {
+            header.classList.remove('hidden');
+        }
+        // Reset scroll tracking
+        lastScrollTop = window.pageYOffset || document.documentElement.scrollTop;
     });
 }
 
@@ -286,33 +379,82 @@ function validateForm(form) {
     return isValid;
 }
 
+// ===== PHONE NUMBER FORMATTING =====
+document.addEventListener('DOMContentLoaded', () => {
+    const phoneInput = document.querySelector('input[name="phone"]');
+    
+    if (phoneInput) {
+        phoneInput.addEventListener('input', function(e) {
+            let value = e.target.value.replace(/\D/g, ''); // Remove all non-digits
+            
+            // If user starts typing without +380, add it
+            if (value && !value.startsWith('380')) {
+                value = '380' + value;
+            }
+            
+            // Format as +380 (XX) XXX-XX-XX
+            if (value.length > 3) {
+                value = '+380 (' + value.substring(3, 5) + ') ' + value.substring(5, 8) + '-' + value.substring(8, 10) + '-' + value.substring(10, 12);
+            } else if (value.length > 0) {
+                value = '+380';
+            }
+            
+            e.target.value = value;
+        });
+        
+        phoneInput.addEventListener('focus', function(e) {
+            if (!e.target.value) {
+                e.target.value = '+380';
+            }
+        });
+    }
+});
+
 // ===== FORM SUBMISSION =====
 document.addEventListener('DOMContentLoaded', () => {
     const forms = document.querySelectorAll('form');
     
     forms.forEach(form => {
         form.addEventListener('submit', (e) => {
-            e.preventDefault();
-            
-            if (validateForm(form)) {
-                // Show loading state
-                const submitBtn = form.querySelector('button[type="submit"]');
-                const originalText = submitBtn.innerHTML;
-                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Відправка...';
-                submitBtn.disabled = true;
-                
-                // Simulate form submission (replace with actual form handling)
-                setTimeout(() => {
-                    // Show success message
-                    showNotification('Повідомлення успішно відправлено!', 'success');
+            // Don't prevent default for Formspree forms
+            if (form.action.includes('formspree.io')) {
+                if (validateForm(form)) {
+                    // Show loading state
+                    const submitBtn = form.querySelector('button[type="submit"]');
+                    const originalText = submitBtn.innerHTML;
+                    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Відправка...';
+                    submitBtn.disabled = true;
                     
-                    // Reset form
-                    form.reset();
-                    submitBtn.innerHTML = originalText;
-                    submitBtn.disabled = false;
-                }, 2000);
+                    // Let the form submit naturally to Formspree
+                    return true;
+                } else {
+                    e.preventDefault();
+                    showNotification('Будь ласка, заповніть всі обов\'язкові поля', 'error');
+                    return false;
+                }
             } else {
-                showNotification('Будь ласка, заповніть всі обов\'язкові поля', 'error');
+                e.preventDefault();
+                
+                if (validateForm(form)) {
+                    // Show loading state
+                    const submitBtn = form.querySelector('button[type="submit"]');
+                    const originalText = submitBtn.innerHTML;
+                    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Відправка...';
+                    submitBtn.disabled = true;
+                    
+                    // Simulate form submission (replace with actual form handling)
+                    setTimeout(() => {
+                        // Show success message
+                        showNotification('Повідомлення успішно відправлено!', 'success');
+                        
+                        // Reset form
+                        form.reset();
+                        submitBtn.innerHTML = originalText;
+                        submitBtn.disabled = false;
+                    }, 2000);
+                } else {
+                    showNotification('Будь ласка, заповніть всі обов\'язкові поля', 'error');
+                }
             }
         });
     });

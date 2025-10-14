@@ -2725,8 +2725,57 @@ body {
     .advantages-grid,
     .details-grid,
     .contact-cards-new {
-        grid-template-columns: 1fr;
-        gap: 1.5rem;
+        grid-template-columns: 1fr !important;
+        gap: 1.25rem;
+    }
+    .overview-card,
+    .advantage-item,
+    .detail-card,
+    .contact-card-new {
+        width: 100%;
+        min-width: 0;
+    }
+    /* Homepage cards: improve readability on phones */
+    .overview-card,
+    .advantage-item,
+    .detail-card,
+    .contact-card-new,
+    .principle-card,
+    .leadership-card {
+        padding: 1.25rem;
+    }
+    .advantage-item,
+    .detail-card {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0.75rem;
+        text-align: left;
+    }
+    .card-icon,
+    .advantage-icon,
+    .detail-icon {
+        width: 56px;
+        height: 56px;
+        border-radius: 12px;
+        font-size: 1.25rem;
+    }
+    .card-content h3,
+    .advantage-content h3,
+    .detail-content h4 {
+        font-size: 1.2rem;
+        margin-bottom: 0.6rem;
+    }
+    .card-content p,
+    .advantage-content p,
+    .detail-content p {
+        font-size: 0.98rem;
+        line-height: 1.65;
+    }
+    /* Avoid jumpy hover animations on touch */
+    .overview-card:hover,
+    .advantage-item:hover,
+    .detail-card:hover {
+        transform: none;
     }
     
     .section-header h2,
@@ -3041,6 +3090,93 @@ body {
     
     .nav-link::after {
         height: 1px;
+    }
+}
+
+/* ===== Financial Reports: Mobile & Footer Overrides ===== */
+.footer-contact .footer-phone {
+    color: #e5e7eb;
+    text-decoration: none;
+    border-bottom: 1px dotted rgba(229, 231, 235, 0.3);
+    transition: color 0.2s ease, border-color 0.2s ease;
+}
+.footer-contact .footer-phone:hover {
+    color: #ffffff;
+    border-bottom-color: rgba(255, 255, 255, 0.6);
+}
+
+@media (max-width: 767px) {
+    .documents-hero-new {
+        padding: 80px 0 50px;
+    }
+    .documents-section-new {
+        padding: 40px 0;
+    }
+    .documents-grid-new {
+        gap: 1.25rem;
+    }
+    .category-header-new {
+        margin-bottom: 1.25rem;
+    }
+    .category-icon-new {
+        width: 56px;
+        height: 56px;
+        font-size: 1.25rem;
+        border-radius: 14px;
+    }
+    .category-info-new h3 {
+        font-size: 1.25rem;
+    }
+    .documents-list-new {
+        gap: 1rem;
+    }
+    .document-item-new {
+        padding: 1rem;
+        align-items: stretch;
+    }
+    .document-content-new {
+        padding: 0 !important;
+    }
+    .documents-section-new iframe {
+        height: 60vh !important;
+        border-radius: 10px !important;
+    }
+    .footer-contact .footer-phone {
+        display: inline-block;
+        padding: 8px 10px;
+        margin-left: 4px;
+        border: 1px solid rgba(255, 255, 255, 0.15);
+        border-radius: 8px;
+        font-weight: 600;
+        letter-spacing: 0.3px;
+    }
+    .footer-contact .footer-phone:active,
+    .footer-contact .footer-phone:focus {
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.25);
+        border-color: rgba(59, 130, 246, 0.6);
+    }
+}
+
+@media (max-width: 575px) {
+    .documents-hero-new {
+        padding: 60px 0 40px;
+    }
+    .documents-section-new {
+        padding: 32px 0;
+    }
+    .documents-section-new iframe {
+        height: 55vh !important;
+    }
+    .category-info-new h3 {
+        font-size: 1.15rem;
+    }
+    .footer-contact .footer-phone {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 8px 10px;
+        font-size: 0.95rem;
     }
 }
 
